@@ -58,7 +58,10 @@ i can see diffrent voting_id_key in container log
 
 3. 
 deleted voting app pod, since voting app pod deployed using vote deployment , it's bringng up new pod again  to keep desired pod count. new ip getting assigned 
-to voting app pod. vote service ep also getting updated with new pod ip. no chnage in result page
+to voting app pod. vote service ep also getting updated with new pod ip. no chnage in result page.
+if we are refresing vote page  or running curl command we can identify  new container processing the request by looking at containerId.
+
+curl 10.97.103.168:5000
 
 4.  
 deleted worker app pod, since worker app pod deployed using worker deployment , it's bringng up new pod again  to keep desired pod count. no chnage in result page
