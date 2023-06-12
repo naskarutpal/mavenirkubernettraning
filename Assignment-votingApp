@@ -1,0 +1,72 @@
+1. 
+applied  the voting and servie yaml. all pod and service created
+[root@ip-172-31-12-58 k8s-specifications]# kubectl get all
+NAME                          READY   STATUS              RESTARTS   AGE
+pod/db-b54cd94f4-dn4c6        1/1     Running             0          6s
+pod/redis-868d64d78-p4c7s     1/1     Running             0          6s
+pod/result-5d57b59f4b-krvtc   1/1     Running             0          6s
+pod/vote-94849dc97-fcrdb      1/1     Running             0          6s
+pod/worker-dd46d7584-j4hmv    0/1     ContainerCreating   0          6s
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/db           ClusterIP   10.97.189.10    <none>        5432/TCP         6s
+service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP          41s
+service/redis        ClusterIP   10.98.119.199   <none>        6379/TCP         6s
+service/result       NodePort    10.110.37.106   <none>        5001:31001/TCP   6s
+service/vote         NodePort    10.97.103.168   <none>        5000:31000/TCP   6s
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/db       1/1     1            1           6s
+deployment.apps/redis    1/1     1            1           6s
+deployment.apps/result   1/1     1            1           6s
+deployment.apps/vote     1/1     1            1           6s
+deployment.apps/worker   0/1     1            0           6s
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/db-b54cd94f4        1         1         1       6s
+replicaset.apps/redis-868d64d78     1         1         1       6s
+replicaset.apps/result-5d57b59f4b   1         1         1       6s
+replicaset.apps/vote-94849dc97      1         1         1       6s
+replicaset.apps/worker-dd46d7584    1         1         0       6s
+[root@ip-172-31-12-58 k8s-specifications]# 
+
+2.
+voting and result app can access usig below link
+http://13.212.163.99:31000/
+http://13.212.163.99:31001/
+
+13.212.163.9 --> worker public ip
+
+3. 
+voted from google chrome browser ,  no of vote count showing 1
+refreshed the vote page and tryied to case the vote again, i see vote count not increasing. tried voting from chrome using multiple tab. same result. 
+by loking at db log it seems from same browser vote is going with same voting_Id_key , so db is nt updating the total count.
+
+[root@ip-172-31-12-58 ec2-user]# kubectl logs -f db-b54cd94f4-dn4c6
+ERROR:  duplicate key value violates unique constraint "votes_id_key"
+DETAIL:  Key (id)=(af72573ba0dc749) already exists.
+STATEMENT:  INSERT INTO votes (id, vote) VALUES ($1, $2)
+
+[root@ip-172-31-12-58 ec2-user]# kubectl logs -f worker-dd46d7584-j4hmv 
+
+Processing vote for 'a' by 'af72573ba0dc749'
+Processing vote for 'b' by 'af72573ba0dc749'
+
+
+now voted from Edge browser , i see total vote count incresed to 2
+i can see diffrent voting_id_key in container log
+
+3. 
+deleted voting app pod, since voting app pod deployed using vote deployment , it's bringng up new pod again  to keep desired pod count. new ip getting assigned 
+to voting app pod. vote service ep also getting updated with new pod ip. no chnage in result page
+
+4.  
+deleted worker app pod, since worker app pod deployed using worker deployment , it's bringng up new pod again  to keep desired pod count. no chnage in result page
+
+5.
+deleted db pod, new db pod created again since it was deployed using deployment.  new ip getting assigned to db pod,  also db service ep getting updated with new db
+pod ip. 
+all voting result data stored  before in db  lost and again voting result shwing as, no votes yet 
+
+6.
+again casted vote and i can see the correct vote count reflecting in voting result page
