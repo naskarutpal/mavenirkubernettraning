@@ -1,0 +1,13 @@
+Q. Write a common use-case, where you will use a daemon set instead of replica set.
+Ans.  Demon set used when copy of same need to deploy in all deesired nodes. system pod like  calico , kube proxy is deployed using daemonset.
+
+there are other case like log generating, resource monitoring applcation pods which need to be deployed in every node , can be deployed using daemonset
+
+[root@ip-172-31-12-58 k8s-specifications]# kubectl get pod    -n kube-system -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[].kind |grep -i Daem
+
+calico-node-m5xfk                                                         DaemonSet
+calico-node-rfx52                                                         DaemonSet
+kube-proxy-8xkw4                                                          DaemonSet
+kube-proxy-tpr25                                                          DaemonSet
+[root@ip-172-31-12-58 k8s-specifications]# 
+      
