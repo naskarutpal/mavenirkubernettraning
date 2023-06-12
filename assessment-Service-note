@@ -1,0 +1,10 @@
+You have deployed an application, that is listening at port 8000. You used a replica-set to deploy it and created a NodePort service to make it accessible. 
+But when you test it, somehow the application is not reachable at the port. Write down your approach and sequentially all the steps that you will take to find out the issue.
+
+1. will check if i am using  correct nodePortp/node Ip addr
+2. will try to check if application is rechable from node itself using  curl <node public Ip>:<nodePort>
+3. will check if application is running properly on correct port  using   curl  <pod ip>:<8000>  comand.  if no response or error response then will 
+try to resolve the issue on application side.  may  check the container log to find the application side issue.
+4. will check if the service using correct targetPort, selector-labels. 
+
+
