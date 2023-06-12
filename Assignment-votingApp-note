@@ -70,3 +70,88 @@ all voting result data stored  before in db  lost and again voting result shwing
 
 6.
 again casted vote and i can see the correct vote count reflecting in voting result page
+
+===========================================================================================
+
+since db data getting lost every time db pod deleted, I have tried to create pv and pvc and mounted the  pvc during db deploymenty. now i see even after deleting the db pod, 
+vote results are not getting lost
+
+
+[root@ip-172-31-12-58 k8s-specifications]# kubectl describe pvc db-data-pvc
+Name:          db-data-pvc
+Namespace:     default
+StorageClass:  
+Status:        Bound
+Volume:        db-data-pv
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed: yes
+               pv.kubernetes.io/bound-by-controller: yes
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      1Gi
+Access Modes:  RWO,ROX
+VolumeMode:    Filesystem
+Mounted By:    db-5f599c6f6d-wp668
+Events:        <none>
+[root@ip-172-31-12-58 k8s-specifications]# kubectl describe pv db-data-pv
+Name:            db-data-pv
+Labels:          app=vote
+Annotations:     pv.kubernetes.io/bound-by-controller: yes
+Finalizers:      [kubernetes.io/pv-protection]
+StorageClass:    
+Status:          Bound
+Claim:           default/db-data-pvc
+Reclaim Policy:  Retain
+Access Modes:    RWO,ROX
+VolumeMode:      Filesystem
+Capacity:        1Gi
+Node Affinity:   <none>
+Message:         
+Source:
+    Type:          HostPath (bare host directory volume)
+    Path:          /tmp/votedb
+    HostPathType:  
+Events:            <none>
+[root@ip-172-31-12-58 k8s-specifications]# kubectl describe pvc db-data-pvc
+Name:          db-data-pvc
+Namespace:     default
+StorageClass:  
+Status:        Bound
+Volume:        db-data-pv
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed: yes
+               pv.kubernetes.io/bound-by-controller: yes
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      1Gi
+Access Modes:  RWO,ROX
+VolumeMode:    Filesystem
+Mounted By:    db-5f599c6f6d-wp668
+Events:        <none>
+[root@ip-172-31-12-58 k8s-specifications]# 
+
+
+[root@ip-172-31-12-58 k8s-specifications]# kubectl describe deployment db
+Name:                   db
+Namespace:              default
+CreationTimestamp:      Mon, 12 Jun 2023 11:53:32 +0000
+Labels:                 <none>
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=db
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=db
+  Containers:
+   db:
+    Image:        postgres:9.3
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:
+      /var/lib/postgresql/data from db-data (rw)
+  Volumes:
+   db-data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  db-data-pvc
+    ReadOnly:   false
